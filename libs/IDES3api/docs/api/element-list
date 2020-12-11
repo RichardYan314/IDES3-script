@@ -1,0 +1,17 @@
+ides.api.cache
+ides.api.copypaste
+ides.api.core
+ides.api.latex
+ides.api.model.fsa
+ides.api.model.supeventset
+ides.api.notice
+ides.api.plugin
+ides.api.plugin.io
+ides.api.plugin.layout
+ides.api.plugin.model
+ides.api.plugin.operation
+ides.api.plugin.presentation
+ides.api.presentation.fsa
+ides.api.ui
+ides.api.undo
+ides.api.utilities

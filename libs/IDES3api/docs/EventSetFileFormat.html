@@ -1,0 +1,58 @@
+<h1>File Format for Supervisory Event Set Models</h1>
+<p>This file format follows that defined for Model Representation in &quot;IDES 2.1 File Format&quot;.</p>
+<p>The model field uses version 3 and type &quot;SupEventSet&quot;. Unlike an FSA model, the data field contains only one internal field <code>&lt;event&gt;</code>, which is described below (adapted from &quot;IDES 2.1 File Format&quot;).</p>
+<p>The event tag <code>&lt;event&gt;</code> contains the property <code>id</code> that internally identifies the event. There are two mandatory tags for <code>&lt;event&gt;</code>: <code>properties</code> and <code>name</code>. There can be many <code>event</code> tags in a FSA model file but all <code>ids</code> have to be unique.</p>
+<p>For the properties tag <code>&lt;properties&gt;</code> there are currently two supported properties for an event: <code>&lt;controllable /&gt;</code> and <code>&lt;observable /&gt;</code>. The possible fields describing the properties of an event are:</p>
+<ol>
+<li>A controllable event:</li>
+</ol>
+<pre><code>    &lt;properties&gt;
+        &lt;controllable/&gt;
+    &lt;/properties&gt;
+</code></pre>
+<ol>
+<li>An observable event</li>
+</ol>
+<pre><code>    &lt;properties&gt;
+        &lt;observable/&gt;
+    &lt;/properties&gt;
+</code></pre>
+<ol>
+<li>A controllable and observable event.</li>
+</ol>
+<pre><code>    &lt;properties&gt;
+        &lt;controllable/&gt;
+        &lt;observable/&gt;
+    &lt;/properties&gt;
+</code></pre>
+<ol>
+<li>A non-controllable and non-observable event</li>
+</ol>
+<pre><code>    &lt;properties/&gt;
+</code></pre>
+<p>The name tag <code>&lt;name&gt;</code> contains the name of the event.</p>
+<p>There are no new meta fields associated with this model.</p>
+<p>A sample file appears as follows:</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;model version=&quot;3&quot; type=&quot;SupEventSet&quot; id=&quot;MyEventSet&quot;&gt;
+&lt;data&gt;
+	&lt;event id=&quot;2&quot;&gt;
+		&lt;properties&gt;
+			&lt;controllable /&gt;
+		&lt;/properties&gt;
+		&lt;name&gt;b&lt;/name&gt;
+	&lt;/event&gt;
+	&lt;event id=&quot;3&quot;&gt;
+		&lt;properties /&gt;
+		&lt;name&gt;c&lt;/name&gt;
+	&lt;/event&gt;
+	&lt;event id=&quot;1&quot;&gt;
+		&lt;properties&gt;
+			&lt;controllable /&gt;
+			&lt;observable /&gt;
+		&lt;/properties&gt;
+		&lt;name&gt;a&lt;/name&gt;
+	&lt;/event&gt;
+&lt;/data&gt;
+&lt;/model&gt;
+</code></pre>

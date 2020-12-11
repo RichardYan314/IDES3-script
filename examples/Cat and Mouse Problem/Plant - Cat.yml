@@ -1,0 +1,20 @@
+name: Plant - Cat
+spec:
+  start state: 2
+  marked state: 2
+  controllable: [c_1, c_2, c_3, c_4, c_5, c_6]
+  observable:   [c_1, c_2, c_3, c_4, c_5, c_6, c_7]
+  table:
+    2:
+      c_3: 0
+    0:
+      c_1: 1
+      c_4: 3
+    1:
+      c_2: 2
+      c_7: 3
+    3:
+      c_5: 4
+      c_7: 1
+    4:
+      c_6: 0

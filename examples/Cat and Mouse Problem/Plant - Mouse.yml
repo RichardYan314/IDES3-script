@@ -1,0 +1,18 @@
+name: Plant - Mouse
+spec:
+  start state: 4
+  marked state: 4
+  controllable: [m_1, m_2, m_3, m_4, m_5, m_6]
+  observable:   [m_1, m_2, m_3, m_4, m_5, m_6]
+  table:
+    4:
+      m_5: 3
+    3:
+      m_6: 0
+    0:
+      m_1: 2
+      m_4: 4
+    2:
+      m_2: 1
+    1:
+      m_3: 0

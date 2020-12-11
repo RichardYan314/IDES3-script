@@ -1,0 +1,331 @@
+<h1>IDES 2.1 File Format</h1>
+<p>There are two types of files in the IDES filesystem. One has the extention .xmd and contains informations regarding DES models, the other has extention .xwd and regards sets of DES models called workspaces.</p>
+<p>The two types will be explained in the subsequent sections.</p>
+<h2>Model representation</h2>
+<p>The XML data in a IDES file, must conform to the following DTD:</p>
+<pre><code>&lt;!ELEMENT model (data,meta*&gt;
+&lt;!ATTLIST version #REQUIRED, type #REQUIRED, id #REQUIRED&gt;
+
+&lt;!ELEMENT data(state*,event*,transition*)&gt;
+
+&lt;!ELEMENT meta(ANY)&gt;
+&lt;!ATTLIST tag #REQUIRED, version #REQUIRED&gt;
+</code></pre>
+<p>Although it can support representation for multiple kinds of discrete event systems, IDES has a default support for finite states automata (from now on called FSA in this text).</p>
+<p>The implementation of the file format for a FSA  is as described by the following Document Type Definition (DTD):</p>
+<pre><code>&lt;!ELEMENT model (data*,meta*)&gt;
+&lt;!ATTLIST version #REQUIRED, type #REQUIRED, id #REQUIRED&gt;
+
+&lt;!ELEMENT data(state*,event*,transition*)&gt;
+
+&lt;!ELEMENT meta(font, state*,transition*)&gt;
+&lt;!ATTLIST tag #REQUIRED, version #REQUIRED&gt;
+
+&lt;!ELEMENT state (name,properties,ANY)&gt;
+&lt;!ATTLIST state id ID #REQUIRED&gt;
+
+&lt;!ELEMENT event (name,properties,ANY)&gt;
+&lt;!ATTLIST event id ID #REQUIRED&gt;
+
+&lt;!ELEMENT transition ANY&gt;
+&lt;!ATTLIST transition id ID #REQUIRED
+                      source IDREF #REQUIRED
+                      target IDREF #REQUIRED
+                      event IDREF #IMPLIED
+                      group #CDATA&gt;
+
+&lt;!ELEMENT name (#PCDATA)&gt;
+
+&lt;!ELEMENT properties (initial?,marked?,
+                       observable?,controllable?,ANY)&gt;
+&lt;!ELEMENT initial       EMPTY&gt;
+&lt;!ELEMENT marked        EMPTY&gt;
+&lt;!ELEMENT observable    EMPTY&gt;
+&lt;!ELEMENT controllable  EMPTY&gt;
+
+&lt;!ELEMENT circle EMPTY&gt;
+&lt;!ATTLIST circle x CDATA #REQUIRED
+                  y CDATA #REQUIRED
+                  r CDATA #REQUIRED&gt;
+
+&lt;!ELEMENT bezier EMPTY&gt;
+&lt;!ATTLIST bezier x1 CDATA #REQUIRED
+                y1 CDATA #REQUIRED
+                ctrlx1 CDATA #REQUIRED
+                ctrly1 CDATA #REQUIRED
+                ctrlx2 CDATA #REQUIRED
+                ctrly2 CDATA #REQUIRED
+                x2 CDATA #REQUIRED
+                y2 CDATA #REQUIRED&gt;
+
+&lt;!ELEMENT arrow EMPTY&gt;
+&lt;!ATTLIST arrow x CDATA #REQUIRED
+                y CDATA #REQUIRED&gt;
+
+&lt;!ELEMENT label EMPTY&gt;
+&lt;!ATTLIST label x CDATA #REQUIRED
+                y CDATA #REQUIRED
+                group CDATA #IMPLIED&gt;
+</code></pre>
+<p>Consider a simple FSA model, with two states and three transitions (Figure 1).</p>
+<hr />
+<p><img src="simple-model-graph.png" alt="A simple model graph" /><img src="simple-model-events.png" alt="A simple model events" /></p>
+<p><em>Figure 1.</em> A simple model created using IDES</p>
+<hr />
+<p>The layout of some graph elements like edges and nodes, can be modified at the user's will though it does never reflect on the structure of the model.</p>
+<p>All the information regarding only the structure of the model itself is named &quot;data&quot;, all the rest is named &quot;metadata&quot;. As metadata one can refer to information regarding the visual representation of a graph or even binary-data that may be needed to be stored, representing some aspect of a model.</p>
+<h3>Detailed description of a model file</h3>
+<p>As said before, the file that represents models in IDES are xml structured files that has .xmd as extention. The first line of such a file tells information about xml version and character encoding.</p>
+<p>A file that displays a  model like the one shown in the figure 1 was created using the version 2.1 of IDES and has as the first line the following information:</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+</code></pre>
+<ul>
+<li>The attribute <code>version</code> indicates the XML version used.</li>
+<li>The attribute <code>encoding</code> indicates the encoding of the file. It must be UTF-8.</li>
+</ul>
+<h3>The model field</h3>
+<p>At the second line starts the model field that contains information about the version of IDES under which the model was created, it also has informations about the DES type and an &quot;id&quot; for the model.</p>
+<p>Every file <strong>must</strong> have the model field.</p>
+<pre><code>&lt;model version=&quot;2.1&quot; type=&quot;FSA&quot; id=&quot;model&quot;&gt;
+</code></pre>
+<ul>
+<li>The attribute <code>version</code> indicates the version of the file format.</li>
+<li>The attribute <code>type</code> indicates the type of DES system represented by the model. Currently, only &quot;FSA&quot; is supported.</li>
+<li>The attribute <code>id</code> is mandatory but deprecated. Its value is not used.</li>
+</ul>
+<hr />
+<p><strong>NOTE:</strong> <em>Future development of IDES may introduce DES models different from &quot;FSA&quot;.</em> <em>Any software processing IDES files must check to see what is the content of the &quot;type&quot; attribute.</em></p>
+<hr />
+<h3>The data field</h3>
+<p>The field with the word &quot;data&quot; as a tag  is the minimal set of informations needed to represent a DES model, it does not hold any informations about, for example, visual representation of a model. A model must have just one occurrence of such a field.</p>
+<p>The tag <code>&lt;data&gt;</code> does not have any attributes. The data field, according to the xml convention starts with the opening tag <code>&lt;data&gt;</code> and finishes when the file hits the enclosing <code>&lt;/data&gt;</code>. As for a FSA model, the data field contains three internal fields: state, event and transition.</p>
+<p>Example of the data field for the FSA model shown in Figure 1:</p>
+<pre><code>&lt;data&gt; 
+	&lt;state id=&quot;1&quot;&gt; 
+		&lt;properties&gt; 
+			&lt;initial /&gt; 
+		&lt;/properties&gt; 
+		&lt;name&gt;1&lt;/name&gt; 
+	&lt;/state&gt; 
+	&lt;state id=&quot;2&quot;&gt; 
+		&lt;properties&gt; 
+			&lt;marked /&gt; 
+		&lt;/properties&gt; 
+		&lt;name&gt;2&lt;/name&gt; 
+	&lt;/state&gt; 
+	&lt;event id=&quot;1&quot;&gt; 
+		&lt;properties&gt; 
+			&lt;controllable /&gt; 
+			&lt;observable /&gt; 
+		&lt;/properties&gt; 
+		&lt;name&gt;a&lt;/name&gt; 
+	&lt;/event&gt; 
+	&lt;event id=&quot;2&quot;&gt; 
+		&lt;properties&gt; 
+			&lt;controllable /&gt; 
+		&lt;/properties&gt; 
+		&lt;name&gt;b&lt;/name&gt; 
+	&lt;/event&gt; 
+	&lt;event id=&quot;3&quot;&gt; 
+		&lt;properties /&gt; 
+		&lt;name&gt;c&lt;/name&gt; 
+	&lt;/event&gt; 
+	&lt;transition id=&quot;1&quot; source=&quot;1&quot; target=&quot;2&quot; event=&quot;1&quot;&gt; 
+	&lt;/transition&gt; 
+	&lt;transition id=&quot;2&quot; source=&quot;2&quot; target=&quot;1&quot; event=&quot;3&quot;&gt; 
+	&lt;/transition&gt; 
+	&lt;transition id=&quot;3&quot; source=&quot;2&quot; target=&quot;2&quot; event=&quot;2&quot;&gt; 
+	&lt;/transition&gt;
+&lt;/data&gt; 
+</code></pre>
+<p>As one can see, there are three different tags inside the data field.</p>
+<ul>
+<li><code>&lt;state&gt;</code> contains the mandatory attribute <code>id</code> which represents internally the state. There can be many of these tags in a FSA model file but all ids have to be unique. There are, for an FSA, two internal tags for a state: <code>&lt;properties&gt;</code> and <code>&lt;name&gt;</code>.
+<ul>
+<li><code>&lt;properties&gt;</code> holds aditional information needed to fully represents a state. At the moment this document was written, the supported properties for a state were &quot;initial&quot; or &quot;marked&quot;. The <code>&lt;properties&gt;</code> tag is mandatory and has to be present even if a state is neither marked nor initial. Its simpler form would be the self-enclosing: <code>&lt;properties/&gt;</code> for such a state. In the example, there are two states in the model. Both are either initial or marked. The currently supported properties for a state in FSA models, are <code>&lt;initial/&gt;</code> and <code>&lt;marked/&gt;</code>. The possible fields describing the properties of a state are:
+<ol>
+<li>An initial state <img src="state-initial.png" alt="" />:</li>
+</ol>
+<pre><code>    &lt;properties&gt;
+        &lt;initial/&gt;
+    &lt;/properties&gt;
+</code></pre>
+<ol>
+<li>A marked state <img src="state-marked.png" alt="" />:</li>
+</ol>
+<pre><code>    &lt;properties&gt;
+        &lt;marked/&gt;
+    &lt;/properties&gt;
+</code></pre>
+<ol>
+<li>An initial and marked state <img src="state-initial-marked.png" alt="" />:</li>
+</ol>
+<pre><code>    &lt;properties&gt;
+        &lt;initial/&gt;
+        &lt;marked/&gt;
+    &lt;/properties&gt;
+</code></pre>
+<ol>
+<li>A conventional state <img src="state-conventional.png" alt="" />:</li>
+</ol>
+<pre><code>    &lt;properties/&gt;
+</code></pre>
+</li>
+<li><code>&lt;name&gt;</code> has the text which appears as a label for the state.</li>
+</ul>
+</li>
+<li><code>&lt;event&gt;</code> contains the usual (and mandatory) property <code>id</code> that internally identifies the event. There are, for an FSA, two mandatory tags for <code>&lt;event&gt;</code>: <code>properties</code> and <code>name</code>. There can be many <code>event</code> tags in a FSA model file but all ids have to be unique.
+<ul>
+<li><code>&lt;properties&gt;</code> there are currently two supported properties for an event: <code>&lt;controllable/&gt;</code> and <code>&lt;observable/&gt;</code>. The possible fields describing the properties of an event are:
+<ol>
+<li>A controllable event:</li>
+</ol>
+<pre><code>    &lt;properties&gt;
+        &lt;controllable/&gt;
+    &lt;/properties&gt;
+</code></pre>
+<ol>
+<li>An observable event:</li>
+</ol>
+<pre><code>    &lt;properties&gt;
+        &lt;observable/&gt;
+    &lt;/properties&gt;
+</code></pre>
+<ol>
+<li>A controllable and observable event:</li>
+</ol>
+<pre><code>    &lt;properties&gt;
+        &lt;controllable/&gt;
+        &lt;observable/&gt;
+    &lt;/properties&gt;
+</code></pre>
+<ol>
+<li>A non-controllable and non-observable event:</li>
+</ol>
+<pre><code>    &lt;properties/&gt;
+</code></pre>
+</li>
+<li><code>&lt;name&gt;</code> contains the name of the event.</li>
+</ul>
+</li>
+<li><code>&lt;transition&gt;</code> this tag has four attributes and no internal tags. The properties are: <code>id</code>, <code>source</code>, <code>target</code> and <code>event</code>. There can be many of these tags in a FSA model file but all ids have to be unique.
+<ul>
+<li><code>id</code> is an unique internal representation for a transition.</li>
+<li><code>source</code> points to the id of the source state of a transition.</li>
+<li><code>target</code> points to the id of the target state of a transition.</li>
+<li><code>event</code> points to the event that triggers the transition. This attribute is not mandatory. If it is missing, no event will be assigned to the transition. Example:</li>
+</ul>
+<pre><code>    &lt;transition id=&quot;3&quot; source=&quot;2&quot; target=&quot;2&quot; event=&quot;2&quot;&gt;
+</code></pre>
+</li>
+</ul>
+<h3>The meta field</h3>
+<p>There can be <strong>many</strong> meta fields inside a file, the meta field must contain all the information that does not belong to the minimal set of information necessary to represent a DES model. As for the type of data that can be stored inside a meta field, it can vary from regular XML structures, to binary data. Any relevant information can be stored between <code>&lt;meta&gt;</code> and <code>&lt;/meta&gt;</code>. Each <code>&lt;meta&gt;</code> filed must have two attributes: * The attribute <code>tag</code> indicates the type of data stored in the meta section. * The attribute <code>version</code> indicates the version of the format in the meta section.</p>
+<hr />
+<p><strong>NOTE:</strong> <em>&quot;Meta&quot; sections are entirely optional. IDES will load a model file without any &quot;meta&quot; sections.</em> <em>Furthermore, there can be multiple &quot;meta&quot; sections in a single file as long as</em> <em>they have unique &quot;tag&quot; attributes. These sections are not guaranteed to contain valid XML data</em> <em>(for example, they may contain binary data). Any software processing IDES files must be</em> <em>able to handle any number of  &quot;meta&quot; sections and has to check to see what is the content</em> <em>of the &quot;tag&quot; attributes to determine if a given section is of interest.</em></p>
+<hr />
+<p>In the current implementation of IDES, only a single <code>meta</code> section is saved in the file. It is the section describing the graphical layout of the FSA model and the <code>tag</code> attribute is &quot;layout&quot;. <em>Layout information may be missing if the FSA model is very large and has never been laid out.</em></p>
+<p>The model used as example contains the following metadata field:</p>
+<pre><code>&lt;meta tag=&quot;layout&quot; version=&quot;2.1&quot;&gt;
+	&lt;font size=&quot;12&quot;/&gt;
+	&lt;layout uniformnodes=&quot;false&quot;/&gt;
+
+	&lt;state id=&quot;1&quot;&gt;
+		&lt;circle r=&quot;18.0&quot; x=&quot;69.0&quot; y=&quot;91.0&quot; /&gt;
+		&lt;arrow x=&quot;36.0&quot; y=&quot;0.0&quot; /&gt;
+	&lt;/state&gt;
+	&lt;state id=&quot;2&quot;&gt;
+		&lt;circle r=&quot;18.0&quot; x=&quot;217.0&quot; y=&quot;92.0&quot; /&gt;
+		&lt;arrow x=&quot;1.0&quot; y=&quot;0.0&quot; /&gt;
+	&lt;/state&gt;
+	&lt;transition id=&quot;1&quot;&gt;
+		&lt;bezier x1=&quot;69.0&quot; y1=&quot;91.0&quot; x2=&quot;217.0&quot; y2=&quot;92.0&quot; ctrlx1=&quot;111.89058685302734&quot; ctrly1=&quot;66.62200927734375&quot; ctrlx2=&quot;174.4427490234375&quot; ctrly2=&quot;67.0446548461914&quot; /&gt;
+		&lt;label x=&quot;5.0&quot; y=&quot;5.0&quot; /&gt;
+	&lt;/transition&gt;
+	&lt;transition id=&quot;2&quot;&gt;
+		&lt;bezier x1=&quot;217.0&quot; y1=&quot;92.0&quot; x2=&quot;69.0&quot; y2=&quot;91.0&quot; ctrlx1=&quot;174.10940551757812&quot; ctrly1=&quot;116.37799072265625&quot; ctrlx2=&quot;111.5572509765625&quot; ctrly2=&quot;115.9553451538086&quot; /&gt;
+		&lt;label x=&quot;5.0&quot; y=&quot;5.0&quot; /&gt;
+	&lt;/transition&gt;
+	&lt;transition id=&quot;3&quot;&gt;
+		&lt;bezier x1=&quot;217.0&quot; y1=&quot;92.0&quot; x2=&quot;217.0&quot; y2=&quot;92.0&quot; ctrlx1=&quot;166.08831787109375&quot; ctrly1=&quot;41.088314056396484&quot; ctrlx2=&quot;267.91168212890625&quot; ctrly2=&quot;41.088314056396484&quot; /&gt;
+		&lt;label x=&quot;-3.0&quot; y=&quot;-17.0&quot; /&gt;
+	&lt;/transition&gt;
+&lt;/meta&gt;
+</code></pre>
+<ul>
+<li><code>&lt;font&gt;</code> specifies the font size to be used in the model. At this time IDES does not support font sizes, so this field is not interpreted.</li>
+<li><code>&lt;layout&gt;</code> contains the attribute <code>uniformnodes</code> which can be &quot;true&quot; or &quot;false&quot;. If it is &quot;true&quot;, all nodes in the graph will have the same size (the maximum node size in the model). This option is settable by the user in the interface.</li>
+<li><code>&lt;state&gt;</code> contains the elements needed for a conventional visual description of a state. The mandatory attribute <code>id</code> is there to identify the state being represented. There must be exactly one of these tags for each state described in the <code>&lt;data&gt;</code> field. There are, for an FSA, two internal tags for a state: <code>&lt;arrow&gt;</code> and <code>&lt;circle&gt;</code>.
+<ul>
+<li><code>&lt;circle&gt;</code> contains the location of a state-representation in a graph. It follows the common computer graphics convention of having the pair (x,y) = (0,0) at the top-left side of the screen. This tag also contains the radius of the node.
+<ul>
+<li><code>r</code> is the radius of the node.</li>
+<li><code>x</code> is the x coordinate of the node in the graph.</li>
+<li><code>y</code> is the y coordinate of the node in the graph.</li>
+</ul>
+</li>
+<li><code>&lt;arrow&gt;</code> contains the coordinates for the directional vector that tells the direction of the initial arrow. This tag is required for every state, however, it is only used when the arrow belongs to the representation of an initial state. It contains two mandatory attributes which give the angle at which the arrow approaches the node.
+<ul>
+<li><code>x</code> is the x coordinate of the vector of approach (assuming that the centre of the node is 0,0).</li>
+<li><code>y</code> is the y coordinate of the vector of approach (assuming that the centre of the node is 0,0).</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>&lt;transition&gt;</code> contains information about visual representation of a transition. It contains the mandatory attributes <code>id</code>, and <code>group</code>.
+<ul>
+<li><code>id</code> which points to the represented transition.</li>
+<li><code>group</code> is an optional numeric value that is used when more than one transition is to be represented in the graph, by the same edge. All transitions with the same group number will be shown as a single edge (with multiple events in the label).<br />
+A transition contains two sub-tags, <code>&lt;label&gt;</code> and <code>&lt;bezier&gt;</code>:</li>
+<li><code>&lt;label&gt;</code> contains information about location of a label containing the name of an event (or the group of events if transitions are grouped) in the graph. It contains two attributes, <code>x</code> and <code>y</code>.
+<ul>
+<li><code>x</code> is the x coordinate of the label in the graph.</li>
+<li><code>y</code> is the y coordinate of the label in the graph.</li>
+</ul>
+</li>
+<li><code>&lt;bezier&gt;</code> contains the information needed to represent an edge as a bezier curve. A bezier curve contains 4 points, so this tag contains 8 attributes (corresponding to the coordinates of the control points, as shown in the figure) and no subtags.<br />
+<img src="transition-bezier.png" alt="Bezier transition" />
+<ul>
+<li><code>x1</code>, the x coordinate for the point p1 in the graph.</li>
+<li><code>y1</code>, the y coordinate for the point p1 in the graph.</li>
+<li><code>x2</code>, the x coordinate for the point p2 in the graph.</li>
+<li><code>y1</code>, the y coordinate for the point p2 in the graph.</li>
+<li><code>ctrlx1</code>, the x coordinate for the point ctrl1 in the graph.</li>
+<li><code>ctrly1</code>, the y coordinate for the point ctrl1 in the graph.</li>
+<li><code>ctrlx2</code>, the x coordinate for the point ctrl2 in the graph.</li>
+<li><code>ctrly2</code>, the y coordinate for the point ctrl2 in the graph.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2>Workpace representation</h2>
+<p>As said before, files with the extention xwd represent a set of DES files and is defined according to the following DTD:</p>
+<pre><code>&lt;!ELEMENT workspace (model*) &gt;
+&lt;!ATTLIST version #REQUIRED&gt;
+
+&lt;!ELEMENT model EMPTY&gt;
+&lt;!ATTLIST file #REQUIRED, position #REQUIRED, selection #IMPLIED&gt;
+</code></pre>
+<h3>Detailed description of a workspace file</h3>
+<p>A simple example of a workspace file with two models is given in the following box:</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; 
+&lt;workspace version=&quot;2.1&quot;&gt; 
+	&lt;model file=&quot;model.xmd&quot; position=&quot;0&quot; selected=&quot;true&quot;/&gt; 
+	&lt;model file=&quot;model2.xmd&quot; position=&quot;1&quot;/&gt; 
+&lt;/workspace&gt;
+</code></pre>
+<ul>
+<li><code>&lt;workspace&gt;</code> contains the mandatory attribute version which indicates the version of IDES that has built the file.
+<ul>
+<li><code>version</code> is the mandatory attribute that contains the version of IDES in which the file was created.</li>
+</ul>
+</li>
+<li><code>&lt;model&gt;</code> contains three mandatory attributes and no subfields. It has information about the files containing the DES models present in the workspace.
+<ul>
+<li><code>file</code> contains a path (in relation to the workspace file) for a model file.</li>
+<li><code>position</code> tells the position of the model in a sequence of models. (In IDES the position is related to where, in the filmstrip, a model is shown).</li>
+<li><code>selected</code>, it can be &quot;true&quot; or &quot;false&quot; and indicates which model is selected when the workspace is loaded. When omitted, it is assumed to be &quot;false&quot;. Only one model can have this attribute set to &quot;true&quot;.</li>
+</ul>
+</li>
+</ul>
