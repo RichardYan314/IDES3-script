@@ -198,4 +198,130 @@ class UtilsTestValidate extends AnyFunSuite {
       )
     ))
   }
+
+  test("controllable null") {
+    parseSpec(
+      """
+        | spec:
+        |   controllable:
+        |""".stripMargin) should be
+    Success(new FSASpec(
+      nameDft,
+      layouterDft,
+      new Spec(
+        Set(),
+        Set(),
+        Set(),
+        Set(),
+        Map()
+      )
+    ))
+  }
+
+  test("controllable singleton") {
+    parseSpec(
+      """
+        | spec:
+        |   controllable: a
+        |""".stripMargin) should be
+    Success(new FSASpec(
+      nameDft,
+      layouterDft,
+      new Spec(
+        Set(),
+        Set(),
+        Set("a"),
+        Set(),
+        Map()
+      )
+    ))
+  }
+
+  test("controllable") {
+    parseSpec(
+      """
+        | spec:
+        |   controllable: [a, b]
+        |""".stripMargin) should be
+    Success(new FSASpec(
+      nameDft,
+      layouterDft,
+      new Spec(
+        Set(),
+        Set(),
+        Set("a", "b"),
+        Set(),
+        Map()
+      )
+    ))
+  }
+
+  test("observable null") {
+    parseSpec(
+      """
+        | spec:
+        |   observable:
+        |   table:
+        |     1:
+        |       a:
+        |       b:
+        |""".stripMargin) should be
+    Success(new FSASpec(
+      nameDft,
+      layouterDft,
+      new Spec(
+        Set(),
+        Set(),
+        Set(),
+        Set("a", "b"),
+        Map()
+      )
+    ))
+  }
+
+  test("observable singleton") {
+    parseSpec(
+      """
+        | spec:
+        |   observable: c
+        |   table:
+        |     1:
+        |       a:
+        |       b:
+        |""".stripMargin) should be
+    Success(new FSASpec(
+      nameDft,
+      layouterDft,
+      new Spec(
+        Set(),
+        Set(),
+        Set("c"),
+        Set(),
+        Map()
+      )
+    ))
+  }
+
+  test("observable") {
+    parseSpec(
+      """
+        | spec:
+        |   observable: [c, d]
+        |   table:
+        |     1:
+        |       a:
+        |       b:
+        |""".stripMargin) should be
+    Success(new FSASpec(
+      nameDft,
+      layouterDft,
+      new Spec(
+        Set(),
+        Set(),
+        Set(),
+        Set("c", "d"),
+        Map()
+      )
+    ))
+  }
 }

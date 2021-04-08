@@ -204,7 +204,7 @@ object FSASpec {
           val events: Set[String] =
             table match {
               case Valid(table) =>
-                table.values.flatMap(map => map.values).flatten.toSet
+                table.values.flatMap(map => map.keys).toSet
               case Invalid(_) => Set()
             }
 

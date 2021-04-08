@@ -56,6 +56,13 @@ object Utils {
     obj match {
       case null => Set[T]().validNec
       case f: T => Set(f).validNec
+      case s: Set[_] =>
+        s.map({
+          case v: T => v.validNec
+          case v => s"Value $v is not of type ${tag.runtimeClass.asInstanceOf[Class[T]]}".invalidNec
+        }).toList
+          .sequence
+          .map(Set.from)
       case l: java.lang.Iterable[_] =>
         l.asScala.map({
           case v: T => v.validNec
