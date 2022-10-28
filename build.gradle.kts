@@ -91,7 +91,7 @@ tasks {
     jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-        destinationDir = file("../IDES-3.1.3/plugins")
+        //destinationDir = file("../IDES-3.1.3/plugins") // for development
         archiveFileName.set("IDES3script.IDES3script.jar")
 
         configurations["compileClasspath"].forEach { file: File ->
