@@ -84,6 +84,7 @@ class FSASpec (
     // add events to model
     val eventTbl: Map[String, SupervisoryEvent] = trans
       .map(_._2)
+      .diff(spec.epsilon)
       .map(symbol => {
         val event = fsa.assembleEvent(symbol)
 
@@ -105,11 +106,16 @@ class FSASpec (
     // add transitions to model
     trans
       .foreach({ case (from, symbol, to) =>
-        val trans = fsa.assembleTransition(
-          stateTbl(from).getId,
-          stateTbl(to).getId,
-          eventTbl(symbol).getId
-        )
+        val trans = if (spec.epsilon.contains(symbol)) {
+          fsa.assembleEpsilonTransition(
+            stateTbl(from).getId,
+            stateTbl(to).getId
+          )} else {
+            fsa.assembleTransition(
+              stateTbl(from).getId,
+              stateTbl(to).getId,
+              eventTbl(symbol).getId
+          )}
 
         fsa.add(trans)
       })
@@ -133,6 +139,7 @@ object FSASpec {
   class Spec(
               val startStates: Set[String],
               val markedStates: Set[String],
+              val epsilon: Set[String],
               val controllable: Set[String],
               val observable: Set[String],
               val table: Map[String, Map[String, Set[String]]]) {
@@ -143,6 +150,7 @@ object FSASpec {
         else {
           startStates == that.startStates &&
           markedStates == that.markedStates &&
+          epsilon == that.epsilon &&
           table == that.table
         }
       case _ => false
@@ -152,6 +160,7 @@ object FSASpec {
       Map(
         "startStates" -> startStates,
         "markedStates" -> markedStates,
+        "epsilon" -> epsilon,
         "table" -> table
       )
 
@@ -164,6 +173,7 @@ object FSASpec {
     val nameDft = "untitled"
     val layouterDft: String = null
     val emptyspec = new Spec(
+      Set(),
       Set(),
       Set(),
       Set(),
@@ -195,6 +205,12 @@ object FSASpec {
               .getOrNull()
             )
 
+          val epsilon: ValidatedNec[String, Set[String]] =
+            Utils.castSet[String](map
+              .get("epsilon")
+              .getOrNull()
+            )
+
           val table: ValidatedNec[String, Map[String, Map[String, Set[String]]]] =
             parseSpec(map
               .get("table")
@@ -223,7 +239,7 @@ object FSASpec {
               .getOrElse(events)
             )
 
-          (starts, marked, controllable, observable, table).mapN(new Spec(_, _, _, _, _))
+          (starts, marked, epsilon, controllable, observable, table).mapN(new Spec(_, _, _, _, _, _))
         })
         .fold(
           _ => ("spec cannot be understand as a map: " + obj.getClass).invalidNec,

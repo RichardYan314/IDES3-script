@@ -28,7 +28,7 @@ repositories {
     maven {
         // <id>artima</id>
         name = "Artima Maven Repository"
-        url = uri("http://repo.artima.com/releases")
+        url = uri("https://repo.artima.com/releases")
     }
 }
 
@@ -89,7 +89,9 @@ sourceSets {
 
 tasks {
     jar {
-//        destinationDir = file("../IDES3/plugins")
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+        destinationDir = file("../IDES-3.1.3/plugins")
         archiveFileName.set("IDES3script.IDES3script.jar")
 
         configurations["compileClasspath"].forEach { file: File ->

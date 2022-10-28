@@ -95,6 +95,7 @@ class UtilsTestValidate extends AnyFunSuite {
         Set(),
         Set(),
         Set(),
+        Set(),
         Map()
       )
     ))
@@ -111,6 +112,7 @@ class UtilsTestValidate extends AnyFunSuite {
       layouterDft,
       new Spec(
         Set("1", "2"),
+        Set(),
         Set(),
         Set(),
         Set(),
@@ -133,6 +135,7 @@ class UtilsTestValidate extends AnyFunSuite {
         Set(),
         Set(),
         Set(),
+        Set(),
         Map()
       )
     ))
@@ -148,6 +151,7 @@ class UtilsTestValidate extends AnyFunSuite {
       nameDft,
       layouterDft,
       new Spec(
+        Set(),
         Set(),
         Set(),
         Set(),
@@ -173,6 +177,7 @@ class UtilsTestValidate extends AnyFunSuite {
         Set(),
         Set(),
         Set(),
+        Set(),
         Map("1" -> Map("\\alpha" -> Set("1")))
       )
     ))
@@ -190,6 +195,7 @@ class UtilsTestValidate extends AnyFunSuite {
       nameDft,
       layouterDft,
       new Spec(
+        Set(),
         Set(),
         Set(),
         Set(),
@@ -213,6 +219,7 @@ class UtilsTestValidate extends AnyFunSuite {
         Set(),
         Set(),
         Set(),
+        Set(),
         Map()
       )
     ))
@@ -228,6 +235,7 @@ class UtilsTestValidate extends AnyFunSuite {
       nameDft,
       layouterDft,
       new Spec(
+        Set(),
         Set(),
         Set(),
         Set("a"),
@@ -247,6 +255,7 @@ class UtilsTestValidate extends AnyFunSuite {
       nameDft,
       layouterDft,
       new Spec(
+        Set(),
         Set(),
         Set(),
         Set("a", "b"),
@@ -273,6 +282,7 @@ class UtilsTestValidate extends AnyFunSuite {
         Set(),
         Set(),
         Set(),
+        Set(),
         Set("a", "b"),
         Map()
       )
@@ -293,6 +303,7 @@ class UtilsTestValidate extends AnyFunSuite {
       nameDft,
       layouterDft,
       new Spec(
+        Set(),
         Set(),
         Set(),
         Set("c"),
@@ -319,7 +330,68 @@ class UtilsTestValidate extends AnyFunSuite {
         Set(),
         Set(),
         Set(),
+        Set(),
         Set("c", "d"),
+        Map()
+      )
+    ))
+  }
+
+  test("epsilon null") {
+    parseSpec(
+      """
+        | spec:
+        |   epsilon:
+        |""".stripMargin) should be
+    Success(new FSASpec(
+      nameDft,
+      layouterDft,
+      new Spec(
+        Set(),
+        Set(),
+        Set(),
+        Set(),
+        Set(),
+        Map()
+      )
+    ))
+  }
+
+  test("epsilon singleton") {
+    parseSpec(
+      """
+        | spec:
+        |   observable: e
+        |""".stripMargin) should be
+    Success(new FSASpec(
+      nameDft,
+      layouterDft,
+      new Spec(
+        Set(),
+        Set(),
+        Set("e"),
+        Set(),
+        Set(),
+        Map()
+      )
+    ))
+  }
+
+  test("epsilon") {
+    parseSpec(
+      """
+        | spec:
+        |   observable: [e, epsilon, "\epsilon"]
+        |""".stripMargin) should be
+    Success(new FSASpec(
+      nameDft,
+      layouterDft,
+      new Spec(
+        Set(),
+        Set(),
+        Set("e", "epsilon", "\\epsilon"),
+        Set(),
+        Set(),
         Map()
       )
     ))

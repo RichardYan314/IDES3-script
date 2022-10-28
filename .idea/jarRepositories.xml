@@ -26,5 +26,10 @@
       <option name="name" value="Artima Maven Repository" />
       <option name="url" value="http://repo.artima.com/releases" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="Artima Maven Repository" />
+      <option name="name" value="Artima Maven Repository" />
+      <option name="url" value="https://repo.artima.com/releases" />
+    </remote-repository>
   </component>
 </project>

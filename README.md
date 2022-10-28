@@ -14,13 +14,13 @@ Contributions are welcomed!
 
 ## Prerequisites
 
-Current version (v0.1.1) requires:
+Current version (v0.2.0) requires:
 
-- JRE: v15
+- JRE: v17
 - [IDES3](https://github.com/krudie/IDES): v3.1.3
 - [Graaljs](https://mvnrepository.com/artifact/org.graalvm.js/js/20.3.0): v20.3.0
 
-This plugin requires JRE v15.
+This plugin requires JRE v17.
 
 The plugin is developed for IDES3 v3.1.3.
 It is not known at all whether the plugin works with IDES3 of a higher or lower version.
@@ -90,6 +90,7 @@ layouter: "JGraph organic layout"
 spec:
   start states: 1
   marked states: 1
+  epsilon: e
   controllable: \alpha
   observable: \alpha
   table:
@@ -121,6 +122,8 @@ spec:
     
     Can be specified either as a singleton 
     (e.g., `1` or `"q_0"`), or as a list (e.g., `[1,2,3]`).
+    
+  + `epsilon`: the symbol for epsilon transition (e.g., `e` or `epsilon` or `\epsilon`).
      
   + `controllable`: The controllable events of the FSA. 
     
