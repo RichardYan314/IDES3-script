@@ -7,7 +7,6 @@ import java.util
 import java.util.Objects
 import java.util.function.Predicate
 import java.util.prefs.Preferences
-
 import ExecuteScript._
 import TryWithPeek._
 import com.esotericsoftware.yamlbeans.YamlReader
@@ -18,6 +17,7 @@ import ides.api.plugin.layout.FSALayoutManager
 import ides.api.plugin.model.{DESEventSet, DESModel, ModelManager}
 import ides.api.plugin.operation.{Operation, OperationManager}
 import ides.api.presentation.fsa.FSAStateLabeller
+
 import javax.script.ScriptEngine
 import javax.swing.JFileChooser
 import org.graalvm.polyglot.{Context, HostAccess, Value}
@@ -26,6 +26,7 @@ import scala.annotation.varargs
 import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 import cats.implicits._
+import ides.api.model.supeventset.SupervisoryEvent
 
 class ExecuteScript extends Operation {
   private val LAST_USED_FOLDER = "LAST_USED_FOLDER"
@@ -283,50 +284,10 @@ object ExecuteScript {
       val clazz = inputTypes(i)
       if (i == inputTypes.length - 1 && op.getNumberOfInputs < 0) { // last unbounded argument
         args.drop(i).foreach((obj: Any) => {
-          if (clazz.isAssignableFrom(classOf[FSAModel])) {
-            if (classOf[String].isAssignableFrom(obj.getClass))
-              inputs.add(Hub.getWorkspace.getModel(obj.asInstanceOf[String]))
-            else if (classOf[FSAModel].isAssignableFrom(obj.getClass))
-              inputs.add(obj.asInstanceOf[FSAModel])
-            else { // TODO
-              Log.logError("unsupported input type:" + obj.getClass)
-              throw new UnsupportedOperationException
-            }
-          } else if (clazz.isAssignableFrom(classOf[DESEventSet]) && obj.isInstanceOf[List[String]]) {
-            val events = obj
-              .asInstanceOf[List[String]]
-              .map(classOf[String].cast)
-            val eventSet = ModelManager.instance.createEmptyEventSet
-            val fsa = ModelManager.instance.createModel(classOf[FSAModel])
-            events.foreach((e: String) => eventSet.add(fsa.assembleEvent(e)))
-            inputs.add(eventSet)
-          } else {
-            Log.logError("unsupported input type")
-            throw new UnsupportedOperationException
-          }
+          inputs.add(parseArg(args(i), clazz: Class[_]))
         })
       } else {
-        val obj = args(i)
-        if (clazz.isAssignableFrom(classOf[FSAModel])) {
-          if (classOf[String].isAssignableFrom(obj.getClass))
-            inputs.add(Hub.getWorkspace.getModel(obj.asInstanceOf[String]))
-          else if (classOf[FSAModel].isAssignableFrom(obj.getClass)) inputs.add(obj.asInstanceOf[FSAModel])
-          else {
-            Log.logError("unsupported input type")
-            throw new UnsupportedOperationException
-          }
-        } else if (clazz.isAssignableFrom(classOf[DESEventSet]) && obj.isInstanceOf[List[String]]) {
-          val events = args(i)
-            .asInstanceOf[List[String]]
-            .map(classOf[String].cast)
-          val eventSet = ModelManager.instance.createEmptyEventSet
-          val fsa = ModelManager.instance.createModel(classOf[FSAModel])
-          events.foreach((e: String) => eventSet.add(fsa.assembleEvent(e)))
-          inputs.add(eventSet)
-        } else {
-          Log.logError("unsupported input type")
-          throw new UnsupportedOperationException
-        }
+        inputs.add(parseArg(args(i), clazz: Class[_]))
       }
     }
 
@@ -359,6 +320,40 @@ object ExecuteScript {
       })
 
     outputs
+  }
+
+  private def parseArg(obj: Any, clazz: Class[_]): AnyRef = {
+    if (clazz.isAssignableFrom(classOf[FSAModel])) {
+      if (classOf[String].isAssignableFrom(obj.getClass))
+        return Hub.getWorkspace.getModel(obj.asInstanceOf[String])
+      else if (classOf[FSAModel].isAssignableFrom(obj.getClass))
+        return obj.asInstanceOf[FSAModel]
+      else {
+        Log.logError(s"Expect FSAModel, got ${obj.getClass}")
+        throw new UnsupportedOperationException
+      }
+    } else if (clazz.isAssignableFrom(classOf[DESEventSet])) {
+      val eventSet = ModelManager.instance.createEmptyEventSet
+      val fsa = ModelManager.instance.createModel(classOf[FSAModel]) // dummy fsa to assemble events
+      (obj match {
+        case list: List[AnyRef] => list.map {
+          case s: String => fsa.assembleEvent(s)
+          case e: SupervisoryEvent => e
+          case _ =>
+            Log.logError(s"Expect list of SupervisoryEvents, got ${obj.getClass}")
+            throw new UnsupportedOperationException
+        }
+        case s: String => List(fsa.assembleEvent(s))
+        case e: SupervisoryEvent => List(e)
+        case _ =>
+          Log.logError(s"Expect list of SupervisoryEvents, got ${obj.getClass}")
+          throw new UnsupportedOperationException
+      }).foreach(eventSet.add)
+      return eventSet
+    } else {
+      // pass as is, do nothing
+      return obj.asInstanceOf[AnyRef]
+    }
   }
 
   /**

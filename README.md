@@ -1,3 +1,5 @@
+### [My IDES3 Plugins](https://github.com/RichardYan314/IDES3-Plugins)
+
 # IDES3script
 
 A [IDES3](https://github.com/krudie/IDES) plugin
@@ -14,7 +16,7 @@ Contributions are welcomed!
 
 ## Prerequisites
 
-Current version (v0.2.0) requires:
+Current version (v0.2.1) requires:
 
 - JRE: v17
 - [IDES3](https://github.com/krudie/IDES): v3.1.3

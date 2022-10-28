@@ -1,2 +1,2 @@
-rootProject.name = "IDES3script"
+rootProject.name = "IDES3-script"
 

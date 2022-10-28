@@ -23,7 +23,7 @@ public class IDES3script implements Plugin {
         return "IDES 3 Scripting Plugin";
     }
     public String getVersion() {
-        return "v0.2.0";
+        return "v0.2.1";
     }
 
     public void initialize() {
